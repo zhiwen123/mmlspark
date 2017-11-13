@@ -25,9 +25,9 @@
  .PARAMETER deploymentName
     The deployment name.
 
- .PARAMETER templateFilePath
-    Path of the template file to deploy.
-    Optional, defaults to deploy-main-template.json in this directory.
+ .PARAMETER templateLocation
+    URL of the template to deploy.
+    Optional, defaults to the one corresponding to this script.
 
  .PARAMETER parametersFilePath
     Path of the parameters file to use for the template, use
@@ -48,6 +48,10 @@
 
 #>
 
+# <=<= this line is replaced with variables defined with `defvar -X` =>=>
+$DOWNLOAD_URL = "$STORAGE_URL/$MML_VERSION"
+# TODO: throw an error if $MML_VERSION is not defined
+
 param(
   [Parameter(Mandatory=$True)]
   [string]
@@ -64,8 +68,9 @@ param(
   [string]
   $deploymentName,
 
+  [Parameter(Mandatory=$True)]
   [string]
-  $templateFilePath = "deploy-main-template.json",
+  $templateLocation = "$DOWNLOAD_URL/deploy-main-template.json",
 
   [Parameter(Mandatory=$True)]
   [string]
@@ -123,7 +128,7 @@ if (!$resourceGroup) {
 # Start the deployment
 Write-Host "Starting deployment...";
 if (Test-Path $parametersFilePath) {
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath -TemplateParameterFile $parametersFilePath;
+    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateUri $templateLocation -TemplateParameterFile $parametersFilePath;
 } else {
-    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateFile $templateFilePath;
+    New-AzureRmResourceGroupDeployment -ResourceGroupName $resourceGroupName -TemplateUri $templateLocation;
 }
